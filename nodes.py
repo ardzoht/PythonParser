@@ -80,6 +80,7 @@ class Process(Parser):
             result.value = self.func(result.value)
             return result
 
+
 class Recursive(Parser):
     def __init__(self, func):
         self.parser = None
@@ -117,19 +118,25 @@ class Compare(Parser):
             return right
 
 
-class IntExp():
+class IntExp:
     def __init__(self, num):
         self.num = num
 
 
-class VarExp():
+class VarExp:
     def __init__(self, variable):
         self.variable = variable
 
 
-class Operation():
+class Operation:
     def __init__(self, operation, left, right):
         self.operation = operation
+        self.left = left
+        self.right = right
+
+class BinaryExp:
+    def __init__(self, op, left, right):
+        self.op = op
         self.left = left
         self.right = right
 
