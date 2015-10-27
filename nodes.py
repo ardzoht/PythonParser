@@ -24,7 +24,7 @@ class Parser:
     def __mul__(self, other):
         return Exp(self, other)
 
-    def __eq__(self, other):
+    def __or__(self, other):
         return Compare(self, other)
 
 
