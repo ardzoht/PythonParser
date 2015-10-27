@@ -18,13 +18,13 @@ class Parser:
     def __add__(self, other):
         return Sum(self, other)
 
-    def __xor__(self, other):
+    def __and__(self, other):
         return Process(self, other)
 
     def __mul__(self, other):
         return Exp(self, other)
 
-    def __or__(self, other):
+    def __eq__(self, other):
         return Compare(self, other)
 
 
