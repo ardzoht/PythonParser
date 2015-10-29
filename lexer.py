@@ -38,14 +38,13 @@ lex = [
     (r'to', RESERVED),
     (r'call', RESERVED),
     (r'show', RESERVED),
-    (r'[+-]?(\d+(\.\d*)?|\.\d+)([eE][+-]?\d+)?', FLOAT), # matches all integers
-    (r'[0-9]+', INT),
-
+    (r'[+-]?(\d+(\.\d*)?|\.\d+)([eE][+-]?\d+)?', FLOAT), # matches all float values
+    (r'[0-9]+', INT), # matches integer values
     (r'[A-Za-z][A-Za-z0-9_]*', VAR), # matches var names
 
 ]
 
-
+# using regex, evaluates if the word is reserved, integer, variable, float, or a space
 def lexer(chars, sentence):
     pos = 0 #Begins in position 0 of the sentence
     tokens = []
@@ -62,7 +61,7 @@ def lexer(chars, sentence):
                     tokens.append(token_exp)
                 break
         if not match:
-            sys.stderr.write('Illegal character: %s\n' % characters[pos])
+            sys.stderr.write('Illegal character: %s\n' % chars[pos])
             sys.exit(1)
         else:
             pos = match.end(0)
@@ -72,11 +71,3 @@ def lexer(chars, sentence):
 def do_lex(characters):
         return lexer(characters, lex)
 
-if __name__ == '__main__':
-    filename = sys.argv[1]
-    file = open(filename)
-    characters = file.read()
-    file.close()
-    tokens = do_lex(characters)
-    for token in tokens:
-        print token
