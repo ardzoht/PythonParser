@@ -1,5 +1,6 @@
 __author__ = 'Dave and Alex'
 
+from math import pow
 
 #Builds a Node with a value, and a position in the sentence
 class Node:
@@ -38,6 +39,7 @@ class Reserved(Parser):
 
     def __call__(self, tokens, pos):
         #tokens[pos][0] == value, tokens[pos][1] == tag
+        #tokens[pos][1] == value, tokens[pos][0] == tag
         if pos < len(tokens) and tokens[pos][0] == self.value and tokens[pos][1] == self.tag:
             #the token can be parsed
             return Node(tokens[pos][0], pos + 1) #send the next position of token
@@ -182,12 +184,19 @@ class IntExp:
     def __repr__(self):
         return 'Numero(%s)' % self.num
 
+    def evaluation(self, env):
+        return self.num
+
 class VarExp:
     def __init__(self, variable):
         self.variable = variable
 
     def __repr__(self):
         return 'Variable(%s)' % self.variable
+
+    def evaluation(self, env):
+        if self.variable in env:
+            return env[self.variable]
 
 class Operation:
     def __init__(self, operation, left, right):
@@ -198,11 +207,49 @@ class Operation:
     def __repr__(self):
         return 'Grupo( %s, %s, %s)' % (self.operation, self.left, self.right)
 
+    def evaluation(self, env):
+        valor_izq = self.left.evaluation(env)
+        valor_der = self.right.evaluation(env)
+        if self.operation == '+':
+            valor = valor_izq  + valor_der
+        elif self.operation == '-':
+            valor = valor_izq - valor_der
+        elif self.operation == '*':
+            valor = valor_izq * valor_der
+        elif self.operation == '/':
+            valor = valor_izq / valor_der
+        elif self.operatin == '^':
+            valor = pow(valor_izq, valor_der)
+        elif self.operation == '%':
+            valor = valor_izq % valor_der
+        else:
+            raise RuntimeError('Error: Operador desconocido. Operador: ' + self.operation)
+        return valor
+
 class RelExp:
     def __init__(self, operation, left, right):
-        self.op = operation
+        self.operation = operation
         self.left = left
         self.right = right
+
+    def evaluation(self, env):
+        valor_izq = self.left.evaluation(env)
+        valor_der = self.right.evaluation(env)
+        if self.operation == '<':
+            valor = valor_izq < valor_der
+        elif self.operation == '>':
+            valor = valor_izq > valor_der
+        elif self.operation == '<=':
+            valor = valor_izq <= valor_der
+        elif self.operation == '>=':
+            valor = valor_izq >= valor_der
+        elif self.operation == '==':
+            valor = valor_izq == valor_der
+        elif self.operation == '!=':
+            valor = valor_izq != valor_der
+        else:
+            raise RuntimeError('Error: Operador desconocido. Operador: ' + self.operation)
+        return valor
 
 
 class Assign:
@@ -213,11 +260,21 @@ class Assign:
     def __repr__(self):
         return 'Asignacion(%s , %s)' % (self.name, self.exp)
 
+    def evaluation(self, env):
+        value = self.exp.evaluation(env)
+        env[self.name] = value
+
 class Statement:
     def __init__(self, left, right):
         self.left = left
         self.right = right
 
+    def __repr__(self):
+        return 'AsignacionComp(%s, %s)' % (self.left, self.right)
+
+    def evaluation(self, env):
+        self.left.evaluation(env)
+        self.right.evaluation(env)
 
 class IfExp:
     def __init__(self, condition, true, false):
@@ -225,10 +282,27 @@ class IfExp:
         self.true = true
         self.false = false
 
+    def __repr__(self):
+        return 'AsignacionIf(%s, %s, %s)' % (self.condition, self.true, self.false)
+
+    def evaluation(self, env):
+        valor_condicional = self.condition.evaluation(env)
+        if valor_condicional:
+            self.true.evaluation(env)
+        else:
+            if self.false:
+                self.false.evaluation(env)
 
 class WhileExp:
     def __init__(self, condition, exp):
         self.condition = condition
         self.exp = exp
 
+    def __repr__(self):
+        return 'AsignacionWhile(%s, %s)' % (self.condition, self.exp)
 
+    def evaluation(self, env):
+        valor_condicional = self.condition.evaluation(env)
+        while valor_condicional:
+            self.exp.evaluation(env)
+            valor_condicional = self.condition.evaluation(env)
