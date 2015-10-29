@@ -23,14 +23,21 @@ lex = [
     (r'<=', RESERVED),
     (r'<', RESERVED),
     (r'>=', RESERVED),
-    (r'<', RESERVED),
+    (r'>', RESERVED),
     (r'==', RESERVED),
     (r'!=', RESERVED),
     (r'if', RESERVED),
-    (r'else', RESERVED),
+    (r'else:', RESERVED),
+    (r':', RESERVED),
+    (r'end', RESERVED),
     (r'{', RESERVED),
     (r'}', RESERVED),
+    (r';', RESERVED),
     (r'while', RESERVED),
+    (r'def', RESERVED),
+    (r'for', RESERVED),
+    (r'to', RESERVED),
+    (r'call', RESERVED),
     (r'[0-9]+',                INT), # matches all integers
     (r'[A-Za-z][A-Za-z0-9_]*', VAR), # matches var names
 

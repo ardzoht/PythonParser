@@ -205,20 +205,39 @@ class Operation:
         self.right = right
 
     def __repr__(self):
-        return 'Grupo( %s, %s, %s)' % (self.operation, self.left, self.right)
+        return 'Operacion( %s, %s, %s)' % (self.operation, self.left, self.right)
 
-    def evaluation(self, env):
+    def only_operation(self, env):
         valor_izq = self.left.evaluation(env)
         valor_der = self.right.evaluation(env)
         if self.operation == '+':
-            valor = valor_izq  + valor_der
+            valor = valor_izq + valor_der
         elif self.operation == '-':
             valor = valor_izq - valor_der
         elif self.operation == '*':
             valor = valor_izq * valor_der
         elif self.operation == '/':
             valor = valor_izq / valor_der
-        elif self.operatin == '^':
+        elif self.operation == '^':
+            valor = pow(valor_izq, valor_der)
+        elif self.operation == '%':
+            valor = valor_izq % valor_der
+        else:
+            raise RuntimeError('Error: Operador desconocido. Operador: ' + self.operation)
+        env['Valor'] = valor
+
+    def evaluation(self, env):
+        valor_izq = self.left.evaluation(env)
+        valor_der = self.right.evaluation(env)
+        if self.operation == '+':
+            valor = valor_izq + valor_der
+        elif self.operation == '-':
+            valor = valor_izq - valor_der
+        elif self.operation == '*':
+            valor = valor_izq * valor_der
+        elif self.operation == '/':
+            valor = valor_izq / valor_der
+        elif self.operation == '^':
             valor = pow(valor_izq, valor_der)
         elif self.operation == '%':
             valor = valor_izq % valor_der
@@ -306,3 +325,38 @@ class WhileExp:
         while valor_condicional:
             self.exp.evaluation(env)
             valor_condicional = self.condition.evaluation(env)
+
+class FuncExp:
+    def __init__(self, name, exp):
+        self.name = name
+        self.exp = exp
+
+    def __repr__(self):
+        return 'Funcion(%s, %s)' % (self.name, self.exp)
+
+    def evaluation(self, env):
+        env[self.name] = self.exp
+
+class CallExp:
+    def __init__(self, name):
+        self.name = name
+
+    def __repr__(self):
+        return 'LlamadaFuncion(%s)' % self.name
+
+    def evaluation(self, env):
+        exp = env[self.name]
+        exp.evaluation(env)
+
+class ForExp:
+    def __init__(self, first, second, exp):
+        self.first = first
+        self.second = second
+        self.exp = exp
+
+    def __repr__(self):
+        return 'For(%s, %s, %s)' % (self.first, self.second, self.exp)
+
+    def evaluation(self, env):
+        for num in range(self.first, self.second):
+            self.exp.evaluation(env)
