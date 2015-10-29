@@ -207,25 +207,6 @@ class Operation:
     def __repr__(self):
         return 'Operacion( %s, %s, %s)' % (self.operation, self.left, self.right)
 
-    def only_operation(self, env):
-        valor_izq = self.left.evaluation(env)
-        valor_der = self.right.evaluation(env)
-        if self.operation == '+':
-            valor = valor_izq + valor_der
-        elif self.operation == '-':
-            valor = valor_izq - valor_der
-        elif self.operation == '*':
-            valor = valor_izq * valor_der
-        elif self.operation == '/':
-            valor = valor_izq / valor_der
-        elif self.operation == '^':
-            valor = pow(valor_izq, valor_der)
-        elif self.operation == '%':
-            valor = valor_izq % valor_der
-        else:
-            raise RuntimeError('Error: Operador desconocido. Operador: ' + self.operation)
-        env['Valor'] = valor
-
     def evaluation(self, env):
         valor_izq = self.left.evaluation(env)
         valor_der = self.right.evaluation(env)
@@ -236,7 +217,11 @@ class Operation:
         elif self.operation == '*':
             valor = valor_izq * valor_der
         elif self.operation == '/':
-            valor = valor_izq / valor_der
+            try:
+                valor = valor_izq / valor_der
+            except ZeroDivisionError:
+                print "No se puede dividir entre 0"
+                return
         elif self.operation == '^':
             valor = pow(valor_izq, valor_der)
         elif self.operation == '%':
@@ -262,9 +247,9 @@ class RelExp:
             valor = valor_izq <= valor_der
         elif self.operation == '>=':
             valor = valor_izq >= valor_der
-        elif self.operation == '==':
+        elif self.operation == 'equal':
             valor = valor_izq == valor_der
-        elif self.operation == '!=':
+        elif self.operation == 'not equal':
             valor = valor_izq != valor_der
         else:
             raise RuntimeError('Error: Operador desconocido. Operador: ' + self.operation)
@@ -280,8 +265,8 @@ class Assign:
         return 'Asignacion(%s , %s)' % (self.name, self.exp)
 
     def evaluation(self, env):
-        value = self.exp.evaluation(env)
-        env[self.name] = value
+            value = self.exp.evaluation(env)
+            env[self.name] = value
 
 class Statement:
     def __init__(self, left, right):
@@ -348,6 +333,20 @@ class CallExp:
         exp = env[self.name]
         exp.evaluation(env)
 
+class PrintExp:
+    def __init__(self, name):
+        self.name = name
+
+    def __repr__(self):
+        return 'Print(%s)' % self.name
+
+    def evaluation(self, env):
+        try:
+            exp = env[self.name]
+            print exp
+        except Exception:
+            print "No existe la variable"
+
 class ForExp:
     def __init__(self, first, second, exp):
         self.first = first
@@ -358,5 +357,6 @@ class ForExp:
         return 'For(%s, %s, %s)' % (self.first, self.second, self.exp)
 
     def evaluation(self, env):
-        for num in range(self.first, self.second):
+        for num in range(int(self.first), int(self.second)):
             self.exp.evaluation(env)
+

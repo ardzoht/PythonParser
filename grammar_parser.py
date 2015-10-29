@@ -3,7 +3,7 @@ __author__ = 'Dave and Alex'
 from lexer import *
 from nodes import *
 import sys
-
+import math
 
 # Parser for reserved words
 def reserved(var):
@@ -11,6 +11,7 @@ def reserved(var):
 
 var_name = Tag(VAR)
 number = Process(Tag(INT), (lambda i: int(i)))
+floatnum = Process(Tag(FLOAT), (lambda f: float(f)))
 
 def parse(tokens):
     tree = parser()(tokens, 0)
@@ -24,7 +25,7 @@ def list_expressions():
     return Exp(statement(), separator)
 
 def statement():
-    return parse_assign() | parse_call() | parse_if() | parse_while() | parse_function() | parse_call() | parse_for()
+    return parse_assign() | parse_call() | parse_if() | parse_while() | parse_function() | parse_call() | parse_for() | parse_print()
 
 def parse_assign():
     def process(parsed):
@@ -53,7 +54,7 @@ def parse_function():
     def process(parsed):
         ((((_, name), _), exp), _) = parsed
         return FuncExp(name, exp)
-    return reserved('def') + var_name + reserved(':') + Recursive(list_expressions) + reserved('end') ^ process
+    return reserved('function') + var_name + reserved(':') + Recursive(list_expressions) + reserved('end') ^ process
 
 def parse_call():
     def process(parsed):
@@ -63,17 +64,23 @@ def parse_call():
 
 def parse_for():
     def process(parsed):
-        print parsed
         ((((((_, first) ,_),second),_), exp), _) = parsed
         return ForExp(first, second, exp)
-    return reserved('for') + number + reserved('to') + number + reserved(':') + Recursive(list_expressions) + reserved('end') ^ process
+    return reserved('for') + floatnum + reserved('to') + floatnum + reserved(':') + Recursive(list_expressions) + reserved('end') ^ process
+
+
+def parse_print():
+    def process(parsed):
+        (_, var) = parsed
+        return PrintExp(var)
+    return reserved('show') + var_name ^ process
 
 
 def bexp():
     return bool_exp()
 
 def bool_exp():
-    operators = ['<', '<=', '>', '>=', '=', '!=']
+    operators = ['<', '<=', '>', '>=', 'equal', 'not equal']
     return aexp() + op_reducer(operators) + aexp() ^ process_bool
 
 def aexp():
@@ -90,7 +97,7 @@ def exp_parentheses():
 def assign_value():
     #print "Assign Value -> Called"
     # Using Compare node, tries to get number, if it's not an integer, it evaluates the variable
-    return (number ^ (lambda i: IntExp(i))) | (var_name ^ (lambda v: VarExp(v)))
+    return (number ^ (lambda i: IntExp(i))) | (var_name ^ (lambda v: VarExp(v))) | (floatnum ^ (lambda f: IntExp(f)))
 
 def apply_precedence(value_parser, precedence_levels, combine):
     #print "Apply_Precedence -> CALLED"
@@ -115,6 +122,7 @@ def process_parentheses(sentence):
     ((_, p), _) = sentence
     return p
 
+
 def op_reducer(operations):
     #print "Op Reducer -> CALLED"
     oper_parse = [reserved(operation) for operation in operations]
@@ -126,9 +134,6 @@ precedence_levels = [
     ['*', '/', '%'],
     ['+', '-'],
 ]
-
-vars = ['a', 'b', 'c', 'd']
-index_vars = []
 
 if __name__ == '__main__':
     filename = sys.argv[1]
