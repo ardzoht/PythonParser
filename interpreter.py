@@ -4,7 +4,6 @@ import sys
 from grammar_parser import *
 from lexer import *
 
-
 if __name__ == '__main__':
     # first, adds the values of euler, and pi, to the environment
     values = {}

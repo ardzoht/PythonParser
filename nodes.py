@@ -177,6 +177,7 @@ class Opt(Parser):
         else:
             return Node(None, pos)
 
+#Evaluates if it's a number
 class IntExp:
     def __init__(self, num):
         self.num = num
@@ -187,6 +188,7 @@ class IntExp:
     def evaluation(self, env):
         return self.num
 
+#Evaluates if it's a variable
 class VarExp:
     def __init__(self, variable):
         self.variable = variable
@@ -198,6 +200,7 @@ class VarExp:
         if self.variable in env:
             return env[self.variable]
 
+#Evaluates if it's an operator
 class Operation:
     def __init__(self, operation, left, right):
         self.operation = operation
@@ -230,6 +233,7 @@ class Operation:
             raise RuntimeError('Error: Operador desconocido. Operador: ' + self.operation)
         return valor
 
+#Evaluates if it's a confition expression, such as for the ifs and loops
 class RelExp:
     def __init__(self, operation, left, right):
         self.operation = operation
@@ -256,6 +260,7 @@ class RelExp:
         return valor
 
 
+#Evaluates if it's an assignation of an expresion
 class Assign:
     def __init__(self, name, exp):
         self.name = name
@@ -268,6 +273,7 @@ class Assign:
             value = self.exp.evaluation(env)
             env[self.name] = value
 
+#Evaluates if it's a compound statement, such as for many operators and numbers
 class Statement:
     def __init__(self, left, right):
         self.left = left
@@ -280,6 +286,7 @@ class Statement:
         self.left.evaluation(env)
         self.right.evaluation(env)
 
+#Evaluates if it's an if expression
 class IfExp:
     def __init__(self, condition, true, false):
         self.condition = condition
@@ -297,6 +304,7 @@ class IfExp:
             if self.false:
                 self.false.evaluation(env)
 
+#Evaluates if it's a while expression
 class WhileExp:
     def __init__(self, condition, exp):
         self.condition = condition
@@ -311,6 +319,7 @@ class WhileExp:
             self.exp.evaluation(env)
             valor_condicional = self.condition.evaluation(env)
 
+#Evaluates if it's a Function expression
 class FuncExp:
     def __init__(self, name, exp):
         self.name = name
@@ -322,6 +331,7 @@ class FuncExp:
     def evaluation(self, env):
         env[self.name] = self.exp
 
+#Evaluates if it's a 'Call' expression: calls a function.
 class CallExp:
     def __init__(self, name):
         self.name = name
@@ -333,12 +343,13 @@ class CallExp:
         exp = env[self.name]
         exp.evaluation(env)
 
+#Evaluates if it's a 'show' expression: the same as 'print' in Python
 class PrintExp:
     def __init__(self, name):
         self.name = name
 
     def __repr__(self):
-        return 'Print(%s)' % self.name
+        return 'Show(%s)' % self.name
 
     def evaluation(self, env):
         try:
@@ -347,6 +358,7 @@ class PrintExp:
         except Exception:
             print "No existe la variable"
 
+#Evaluates if it's a for expression: loop.
 class ForExp:
     def __init__(self, first, second, exp):
         self.first = first
